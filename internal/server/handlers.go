@@ -53,11 +53,7 @@ var upgrader = &websocket.Upgrader{
 func (s *server) handleChatRoom() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		roomName := mux.Vars(r)["name"]
-		room, ok := s.rooms[roomName]
-		if !ok {
-			room = chat.NewRoom(roomName)
-			s.rooms[roomName] = room
-		}
+		room := s.findOrCreateRoom(roomName)
 
 		socket, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -75,8 +71,8 @@ func (s *server) handleChatRoom() http.HandlerFunc {
 func (s *server) handleRooms() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		rooms := make([]*chat.Room, len(s.rooms))
-		for _, r := range s.rooms {
-			rooms = append(rooms, r)
+		for i, r := range s.rooms {
+			rooms[i] = r
 		}
 		allRooms := struct {
 			Rooms []*chat.Room `json:"rooms"`
@@ -86,4 +82,18 @@ func (s *server) handleRooms() http.HandlerFunc {
 		w.Header().Set("Content-type", "application/json")
 		json.NewEncoder(w).Encode(allRooms)
 	}
+}
+
+func (s *server) findOrCreateRoom(roomName string) *chat.Room {
+	var room *chat.Room
+	for _, r := range s.rooms {
+		if r.Name == roomName {
+			room = r
+		}
+	}
+	if room == nil {
+		room = chat.NewRoom(roomName)
+		s.rooms = append(s.rooms, room)
+	}
+	return room
 }

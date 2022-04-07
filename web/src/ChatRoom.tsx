@@ -1,18 +1,17 @@
 import moment from "moment";
-import { stringify } from "querystring";
 import React, { FormEvent, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { w3cwebsocket } from "websocket";
 import useToken from "./useToken";
 
 type Message = {
-    username:string;
-    text:string;
-    when:Date;
+    username: string;
+    text: string;
+    when: Date;
 }
 
 export const ChatRoom = () => {
-    const {room} = useParams();
+    const { room } = useParams();
     const { token } = useToken();
     const [messages, setMessages] = useState<Message[]>([]);
     const [sendText, setSendText] = useState('');
@@ -30,25 +29,25 @@ export const ChatRoom = () => {
                 const data: Message = JSON.parse(message.data as string);
                 setMessages(previous => [...previous, data]);
                 console.log('received message');
-              };
+            };
             setChatClient(chatClient);
         }
         return () => clientRef.current?.close();
     }, [])
-    
+
     const sendMessage = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         chatClient?.send(JSON.stringify({
-          username: token?.username,
-          text: sendText,
-          when: new Date(),
+            username: token?.username,
+            text: sendText,
+            when: new Date(),
         }));
         setSendText('');
-      };
+    };
 
-    return(
+    return (
         <>
-            <div className="container" style={{height: "100%"}}>
+            <div className="container" style={{ height: "100%" }}>
                 <div className="row">
                     <div className="col">
                         <label>Now chatting in: {room}</label>
@@ -57,17 +56,17 @@ export const ChatRoom = () => {
                         <Link to={'/rooms'}>Leave</Link>
                     </div>
                 </div>
-                <div className="mt-4" style={{height: "80%", overflowY: "scroll", border: "1px solid gray"}}>
-                <table className="table table-striped">
-                    <tbody>
-                        {messages.map((msg, idx) => (
-                            <tr>
-                                <td width={"80%"}>{msg.username}: {msg.text}</td>
-                                <td align="right"><span className="font-italic">{moment(msg.when).format("HH:mm A")}</span></td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                <div className="mt-4" style={{ height: "80%", overflowY: "scroll", border: "1px solid gray" }}>
+                    <table className="table table-striped">
+                        <tbody>
+                            {messages.map((msg, idx) => (
+                                <tr>
+                                    <td width={"80%"}>{msg.username}: {msg.text}</td>
+                                    <td align="right"><span className="font-italic">{moment(msg.when).format("HH:mm A")}</span></td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div className="row">
@@ -75,17 +74,17 @@ export const ChatRoom = () => {
                     <form onSubmit={sendMessage}>
                         <div className='input-group mb-3'>
                             <input
-                            type='text'
-                            className='form-control'
-                            value={sendText}
-                            placeholder='Enter message'
-                            onChange={(e) => setSendText(e.target.value)}
+                                type='text'
+                                className='form-control'
+                                value={sendText}
+                                placeholder='Enter message'
+                                onChange={(e) => setSendText(e.target.value)}
                             />
                             <div>
-                                <button className='btn btn-outline-secondary' type='submit'>Send</button>
+                                <button className='btn btn-outline-secondary' style={{ marginLeft: '5px' }} type='submit'>Send</button>
                             </div>
                         </div>
-                    </form>                
+                    </form>
                 </div>
             </div>
         </>
