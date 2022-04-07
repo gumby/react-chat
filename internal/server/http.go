@@ -10,14 +10,14 @@ import (
 
 type server struct {
 	userDb user.DB
-	rooms  map[string]*chat.Room
+	rooms  []*chat.Room
 	router *mux.Router
 }
 
 func New(db user.DB) *server {
 	s := &server{
 		userDb: db,
-		rooms:  make(map[string]*chat.Room),
+		rooms:  make([]*chat.Room, 0),
 		router: mux.NewRouter(),
 	}
 	s.routes()
